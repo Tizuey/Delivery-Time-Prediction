@@ -1,0 +1,6 @@
+{
+  "mae_model": 5.99,
+  "mae_baseline": 7.58,
+  "n_train": 36474,
+  "n_test": 9119
+}

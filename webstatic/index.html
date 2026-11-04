@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>... e tempo de entrega?</title>
+  <meta name="description" content="Escolha o restaurante, informe o seu endereço e veja o tempo estimado de entrega.">
+  <meta name="theme-color" content="#FF9548">
+  <link rel="stylesheet" href="https://use.typekit.net/avm1cle.css">
+  <style>
+/* Identidade: fundo laranja, cartão branco, campos em pílula com borda laranja.
+   Tipografia: Monsterific BB (Adobe Fonts) nos títulos e rótulos; texto digitado em fonte do sistema
+   para ficar legível. */
+
+:root {
+  --laranja: #ff9548;
+  --branco: #ffffff;
+  --preto: #000000;
+  --tinta: #1b1b1b;
+
+  --fonte: "monsterific-bb", "Impact", "Arial Narrow Bold", "Arial Black", sans-serif;
+  --fonte-texto: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+  --borda: clamp(3px, 0.3vw, 6px);
+  --altura: clamp(2.7rem, 3vw, 3.4rem);
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body { margin: 0; }
+
+[hidden] { display: none !important; }
+
+body {
+  min-height: 100vh;
+  min-height: 100svh;
+  background: var(--laranja);
+  color: var(--branco);
+  font-family: var(--fonte);
+  -webkit-text-size-adjust: 100%;
+}
+
+.pagina {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.4rem, 3.6vw, 3.2rem);
+  padding:
+    max(1.5rem, env(safe-area-inset-top))
+    max(1.1rem, env(safe-area-inset-right))
+    max(1.5rem, env(safe-area-inset-bottom))
+    max(1.1rem, env(safe-area-inset-left));
+}
+
+.titulo {
+  margin: 0;
+  font-weight: 400;
+  font-size: clamp(2.3rem, 8.2vw, 9rem);
+  line-height: 1.02;
+  letter-spacing: 0.01em;
+  text-align: center;
+  text-wrap: balance;
+}
+
+/* ---------- Cartão do formulário ---------- */
+
+.cartao {
+  width: min(100%, 60rem);
+  display: grid;
+  gap: clamp(0.7rem, 1.3vw, 1.1rem);
+  padding: clamp(1.1rem, 2.3vw, 2.2rem) clamp(1.1rem, 3vw, 3.2rem);
+  border-radius: clamp(1.6rem, 3.2vw, 3.1rem);
+  background: var(--branco);
+  color: var(--laranja);
+  font-size: clamp(1.05rem, 1.9vw, 2.1rem);
+}
+
+.linha {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  min-width: 0;
+}
+
+.campo {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  min-width: 0;
+}
+
+.campo--principal { flex: 1 1 auto; }
+.campo--numero { flex: 0 0 34%; }
+
+.campo label {
+  flex: 0 0 auto;
+  min-width: 4.6em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.campo--numero label { min-width: 0; }
+
+input,
+select {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: var(--altura);
+  padding: 0 1.1em;
+  border: var(--borda) solid var(--laranja);
+  border-radius: 999px;
+  background: var(--branco);
+  color: var(--tinta);
+  font-family: var(--fonte-texto);
+  font-size: 0.62em;
+  font-weight: 600;
+}
+
+input::placeholder { color: #b3b3b3; font-weight: 500; }
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.6em;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='12' viewBox='0 0 20 12'%3E%3Cpath d='M2 2l8 8 8-8' fill='none' stroke='%23ff9548' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1.1em center;
+  background-size: 1.1em;
+  cursor: pointer;
+}
+
+select:invalid { color: #b3b3b3; }
+
+input:focus-visible,
+select:focus-visible,
+.botao:focus-visible {
+  outline: 3px solid var(--preto);
+  outline-offset: 3px;
+}
+
+.botao {
+  flex: 0 0 auto;
+  height: var(--altura);
+  padding: 0 1.7em;
+  border: 0;
+  border-radius: 999px;
+  background: var(--laranja);
+  color: var(--preto);
+  font-family: var(--fonte);
+  font-size: 1em;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.botao:hover { filter: brightness(0.96); }
+.botao:active { transform: translateY(1px); }
+.botao[disabled] { opacity: 0.65; cursor: progress; }
+
+/* ---------- Saída: erro e resultado ---------- */
+
+.saida {
+  width: min(100%, 60rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  min-height: 1px;
+}
+
+.erro {
+  margin: 0;
+  max-width: 100%;
+  padding: 0.85rem 1.3rem;
+  border-radius: 1.2rem;
+  background: var(--branco);
+  color: var(--tinta);
+  font-family: var(--fonte-texto);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.resultado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  max-width: 100%;
+}
+
+.resultado__selo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.15em 0.35em;
+  max-width: 100%;
+  font-size: clamp(2.6rem, 7vw, 6.2rem);
+  line-height: 1;
+}
+
+.capacete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5em;
+  padding: 0.12em 0.36em 0.08em;
+  border-radius: 0.9em 0.9em 0.9em 0.18em;
+  background: var(--branco);
+  color: var(--laranja);
+}
+
+.unidade { color: var(--preto); }
+
+.detalhe {
+  margin: 0;
+  max-width: 100%;
+  color: var(--tinta);
+  font-family: var(--fonte-texto);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.resultado:not([hidden]) { animation: surgir 0.35s ease-out; }
+
+@keyframes surgir {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.nota {
+  margin: 0;
+  max-width: 44rem;
+  color: var(--tinta);
+  font-family: var(--fonte-texto);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* ---------- Desktop: grade com coluna de rótulos que se ajusta a qualquer fonte ---------- */
+
+@media (min-width: 42.01rem) {
+  .cartao {
+    grid-template-columns: max-content minmax(0, 2fr) max-content minmax(0, 1fr);
+    column-gap: 0.7em;
+    align-items: center;
+  }
+
+  .linha,
+  .campo { display: contents; }
+
+  .campo label { grid-column: 1; min-width: 0; }
+  .campo--principal :is(input, select) { grid-column: 2; }
+  .campo--restaurante select { grid-column: 2 / 5; }
+  .campo--numero label { grid-column: 3; margin-left: 0.3em; }
+  .campo--numero input { grid-column: 4; }
+  .linha--cep .botao { grid-column: 3 / 5; justify-self: stretch; }
+}
+
+/* ---------- Celular: layout próprio, não uma versão reduzida do desktop ---------- */
+
+@media (max-width: 42rem) {
+  .pagina { justify-content: flex-start; padding-top: max(2rem, env(safe-area-inset-top)); }
+
+  .titulo { font-size: clamp(2.2rem, 12.5vw, 3.6rem); max-width: 14ch; }
+
+  .cartao {
+    gap: 1.05rem;
+    padding: 1.35rem 1.15rem 1.5rem;
+    font-size: 1.35rem;
+    border-radius: 1.8rem;
+  }
+
+  .campo {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.3em;
+  }
+
+  .campo label { min-width: 0; }
+
+  input,
+  select {
+    width: 100%;
+    height: 3.2rem;
+    font-size: 1rem;
+    padding: 0 1.1rem;
+  }
+
+  select { padding-right: 2.8rem; background-size: 1.1rem; background-position: right 1.1rem center; }
+
+  .linha { align-items: flex-end; gap: 0.8rem; }
+  .campo--numero { flex: 0 0 7.2rem; }
+
+  .linha--cep { flex-direction: column; align-items: stretch; gap: 1.05rem; }
+  .linha--cep .campo--principal { flex: 0 0 auto; }
+
+  .botao { width: 100%; height: 3.4rem; font-size: 1.5rem; }
+
+  .resultado__selo { font-size: clamp(2.4rem, 13vw, 3.4rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resultado:not([hidden]) { animation: none; }
+  .botao:active { transform: none; }
+}
+
+/* ---------- Logo opcional (static/logo.png). Se o arquivo não existir, ele some sozinho ---------- */
+.logo {
+  height: clamp(3.4rem, 9vh, 6rem);
+  width: auto;
+  max-width: 80%;
+}
+  </style>
+</head>
+<body>
+  <main class="pagina">
+    <h1 class="titulo">... e tempo de entrega ?</h1>
+
+    <form id="form" class="cartao" novalidate>
+      <div class="campo campo--principal campo--restaurante">
+        <label for="restaurante">Restaurante</label>
+        <select id="restaurante" name="restaurant_id" required>
+          <option value="" disabled selected>Escolha</option>
+        </select>
+      </div>
+
+      <div class="linha">
+        <div class="campo campo--principal">
+          <label for="rua">Nome da rua</label>
+          <input id="rua" name="street" type="text" autocomplete="address-line1" maxlength="120" required>
+        </div>
+        <div class="campo campo--numero">
+          <label for="numero">Número</label>
+          <input id="numero" name="number" type="text" inputmode="numeric" maxlength="7" autocomplete="off" required>
+        </div>
+      </div>
+
+      <div class="linha linha--cep">
+        <div class="campo campo--principal">
+          <label for="cep">CEP</label>
+          <input id="cep" name="cep" type="text" inputmode="numeric" maxlength="9" autocomplete="postal-code" placeholder="00000-000" required>
+        </div>
+        <button id="botao" class="botao" type="submit">Calcular</button>
+      </div>
+    </form>
+
+    <div id="saida" class="saida" aria-live="polite">
+      <p id="erro" class="erro" role="alert" hidden></p>
+
+      <section id="resultado" class="resultado" hidden>
+        <div class="resultado__selo">
+          <span class="capacete"><span id="minutos">0</span></span>
+          <span class="unidade">minutos</span>
+        </div>
+        <p id="detalhe" class="detalhe"></p>
+      </section>
+    </div>
+
+    <!-- Opcional: coloque o arquivo logo.png dentro da pasta static. Sem ele, esta imagem some. -->
+    <img class="logo" src="logo.png" alt="45 Minutos" onerror="this.remove()">
+
+    <p class="nota">Estimativa gerada por um modelo de machine learning treinado com um conjunto de dados público. Use como demonstração.</p>
+  </main>
+
+  <script>
+    //#########################################################################
+    //>>> SUBSTITUIR 2 DE 2: ENDEREÇO DA SUA API NA EC2
+    //Troque o valor abaixo pelo endereço público da API, SEM barra no final.
+    //  - Local ou servido pela própria API (uvicorn / Docker):  deixe "" (vazio)
+    //  - GitHub Pages + EC2:  "https://api.seudominio.com"   (precisa ser HTTPS)
+    //  - Exemplo com IP:  "http://IP_DA_EC2:8000"  (só funciona se a página também for http, ou seja, em teste)
+    //ATENÇÃO: o GitHub Pages usa HTTPS e o navegador bloqueia chamadas a http://IP_DA_EC2.
+    //Veja no README como colocar HTTPS na EC2 (Caddy).
+    //#########################################################################
+    const API_URL = "";
+(() => {
+  "use strict";
+
+  const API = API_URL.replace(/\/$/, "");
+
+  const $ = (id) => document.getElementById(id);
+  const form = $("form");
+  const restaurante = $("restaurante");
+  const rua = $("rua");
+  const numero = $("numero");
+  const cep = $("cep");
+  const botao = $("botao");
+  const erro = $("erro");
+  const resultado = $("resultado");
+  const minutos = $("minutos");
+  const detalhe = $("detalhe");
+
+  const textoBotao = botao.textContent;
+
+  function mostrarErro(mensagem) {
+    resultado.hidden = true;
+    erro.textContent = mensagem;
+    erro.hidden = false;
+  }
+
+  function limparSaida() {
+    erro.hidden = true;
+    erro.textContent = "";
+    resultado.hidden = true;
+  }
+
+  function mensagemDaResposta(dados) {
+    const detail = dados && dados.detail;
+    if (typeof detail === "string") return detail;
+    return "Não foi possível calcular a previsão agora. Tente de novo.";
+  }
+
+  // Máscara de CEP: 00000-000
+  cep.addEventListener("input", () => {
+    const digitos = cep.value.replace(/\D/g, "").slice(0, 8);
+    cep.value = digitos.length > 5 ? `${digitos.slice(0, 5)}-${digitos.slice(5)}` : digitos;
+  });
+
+  numero.addEventListener("input", () => {
+    numero.value = numero.value.replace(/[^0-9a-zA-Z]/g, "").slice(0, 7);
+  });
+
+  function validar() {
+    if (!restaurante.value) return ["Escolha um restaurante.", restaurante];
+    if (rua.value.trim().length < 2) return ["Informe o nome da rua.", rua];
+    if (!/^\d{1,6}[A-Za-z]?$/.test(numero.value.trim())) {
+      return ["Informe o número do imóvel (apenas dígitos, com uma letra opcional).", numero];
+    }
+    if (cep.value.replace(/\D/g, "").length !== 8) return ["Informe um CEP com 8 dígitos.", cep];
+    return null;
+  }
+
+  async function carregarRestaurantes() {
+    try {
+      const resposta = await fetch(`${API}/restaurants`);
+      if (!resposta.ok) throw new Error(String(resposta.status));
+      const lista = await resposta.json();
+      for (const item of lista) {
+        const opcao = document.createElement("option");
+        opcao.value = item.id;
+        opcao.textContent = item.name;
+        restaurante.appendChild(opcao);
+      }
+    } catch {
+      mostrarErro("Não foi possível carregar os restaurantes. Confira se o servidor está em execução.");
+    }
+  }
+
+  form.addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    limparSaida();
+
+    const invalido = validar();
+    if (invalido) {
+      mostrarErro(invalido[0]);
+      invalido[1].focus();
+      return;
+    }
+
+    botao.disabled = true;
+    botao.textContent = "Calculando...";
+
+    try {
+      const resposta = await fetch(`${API}/estimate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          restaurant_id: restaurante.value,
+          street: rua.value.trim(),
+          number: numero.value.trim(),
+          cep: cep.value,
+        }),
+      });
+
+      let dados = null;
+      try { dados = await resposta.json(); } catch { /* resposta sem JSON */ }
+
+      if (!resposta.ok) {
+        mostrarErro(mensagemDaResposta(dados));
+        return;
+      }
+
+      minutos.textContent = String(dados.minutes);
+      let texto = `${dados.restaurant} → ${dados.address}`;
+      if (dados.precision === "rua") {
+        texto += " (localizado pela rua: o número exato não consta no mapa)";
+      }
+      detalhe.textContent = texto;
+      resultado.hidden = false;
+
+      const reduzir = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      resultado.scrollIntoView({ behavior: reduzir ? "auto" : "smooth", block: "nearest" });
+    } catch {
+      mostrarErro("Sem conexão com o servidor. Confira se ele está em execução e tente de novo.");
+    } finally {
+      botao.disabled = false;
+      botao.textContent = textoBotao;
+    }
+  });
+
+  carregarRestaurantes();
+})();
+</script>
+</body>
+</html>
